@@ -141,6 +141,7 @@ function updatePresenceFromHttp(userId, status, name = null, branch = null, appO
 }
 
 // --- Socket.IO auth middleware: verify JWT on every connection ---
+// --- Socket.IO auth middleware: verify JWT on every connection ---
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token || socket.handshake.query?.token;
   if (!token) {
@@ -151,6 +152,9 @@ io.use((socket, next) => {
     socket.user = decoded; // attach verified payload
     next();
   } catch (err) {
+    console.error('[AUTH] jwt.verify failed:', err.message);
+    console.error('[AUTH] token prefix:', token?.substring(0, 40));
+    console.error('[AUTH] JWT_SECRET length:', JWT_SECRET?.length, 'prefix:', JWT_SECRET?.substring(0, 8));
     return next(new Error('Unauthorized: invalid or expired token'));
   }
 });
